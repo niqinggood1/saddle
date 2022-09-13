@@ -11,17 +11,29 @@ from sklearn import ensemble
 from sklearn.ensemble import BaggingRegressor
 from sklearn.tree import ExtraTreeRegressor
 from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn  import  linear_model#LinearRegression
+# from sklearn.linear_model import Ridge
+# from sklearn.linear_model import Lasso
+# from sklearn.linear_model import ElasticNet
+from xgboost  import XGBRegressor
+from lightgbm import LGBMRegressor
 
 def build_regressor_model(name='RandomForestRegressor'):
-    if name == 'DT' :   model = tree.DecisionTreeRegressor()
+    if name == 'LR' :   model = linear_model.LinearRegression()
+    if name == 'Lasso':    model = linear_model.Lasso()  ### 线性回归 ###
+    if name == 'Ridge':    model = linear_model.Ridge()  ### 线性回归 ###
+    if name == 'ElasticNet':model = linear_model.ElasticNet()  ### 线性回归 ###
+    if name == 'DT' :   model = tree.DecisionTreeRegressor(  ) #criterion="mae"
     if name == 'SVM':   model = svm.SVR()                        ### SVM回归 ###
-    if name == 'LR':    model = linear_model.LinearRegression()  ### 线性回归 ###
     if name == 'KNN':   model = neighbors.KNeighborsRegressor() ### KNN回归 ###
     if name == 'RF':    model = ensemble.RandomForestRegressor(n_estimators=21)  # 用20个决策树 ### 随机森林回归 ###
     if name == 'AbaR':  model = ensemble.AdaBoostRegressor(n_estimators=50)  # 用50个决策树### Adaboost回归 ###
     if name == 'GB':    model = ensemble.GradientBoostingRegressor(n_estimators=100)  # 用100个决策树 ### GBRT回归 ###
     if name == 'BR':    model = BaggingRegressor() ### Bagging回归 ###
     if name == 'ER':    model = ExtraTreeRegressor()    ### ExtraTree极端随机树回归 ###
+    if name == 'Xgboost':
+        model = XGBRegressor(max_depth=3,n_estimators=101,learning_rate=0.1)
+    if name == 'LightGBM':   model = LGBMRegressor(n_estimators=100)
     return model
 
 # from sklearn.datasets import make_moons, make_circles, make_classification
@@ -33,9 +45,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
-names = ["NearestNeighbors", "LinearSVM", "RBFSVM",
-         "DecisionTree", "RandomForest", "AdaBoost",
-         "NaiveBayes", "QDA", "GaussianProcess","NeuralNet"]
+
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
 from sklearn import ensemble
@@ -48,30 +58,29 @@ from sklearn.svm import LinearSVC
 from sklearn.ensemble import GradientBoostingClassifier
 from xgboost  import XGBClassifier
 from lightgbm import LGBMClassifier
+import lightgbm as lgb
 def build_classifier_model(name):
-    if name == 'NearestNeighbors':  model = KNeighborsClassifier(3)
+    if name == 'NearestNeighbors':  model = KNeighborsClassifier( 7 )
     if name == 'MLP':               model = MLPClassifier(hidden_layer_sizes=(50,50),
                                                           activation='relu',max_iter=300,alpha=0.01)
     if name == 'LR':                model = LogisticRegression() #penalty='l1'
     if name == 'LinearSVM':         model =SVC(kernel="linear", C=0.025)
-    if name == 'RBFSVM':            model =SVC(gamma=2, C=1)
+    if name == 'RBFSVM':            model =SVC(kernel='rbf') #,gamma=2, C=1
     if name == 'DecisionTree':      model =DecisionTreeClassifier(max_depth=5)
     if name == 'NaiveBayes':        model =GaussianNB()
     if name == 'ER':                model =QuadraticDiscriminantAnalysis()
     if name == 'GaussianProcess':   model =GaussianProcessClassifier()
     if name == 'BernoulliNB':       model =BernoulliNB()
-    if name == 'MultinomialNB':     model =MultinomialNB()
-    if name == 'RandomForest':      model =ensemble.RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1)
+    if name == 'MultinomialNB':     model =MultinomialNB(alpha=1,class_prior=None, fit_prior=True)
+    if name == 'RandomForest':      model =ensemble.RandomForestClassifier(max_depth=5, n_estimators=101 )
     if name == 'AdaBoost':          model =ensemble.AdaBoostClassifier()
-    if name == 'GBC':               model =ensemble.GradientBoostingClassifier()
-    if name == 'LinearSVC':         model = LinearSVC()
-    if name == 'SVC':               model = SVC(kernel='rbf')
-    if name =='GradientBoosting'  : model = GradientBoostingClassifier()
-    if name == 'xgb':
-        model = XGBClassifier( max_depth=10, learning_rate=0.1, n_estimators=101, silent=True, objective='reg:linear', nthread=-1,
-    	                    gamma=0,	 min_child_weight=1, max_delta_step=0, subsample=0.85,  colsample_bytree=0.7,  colsample_bylevel=1,
-    	                    reg_alpha=0, reg_lambda=1, scale_pos_weight=1, seed=1440, missing=None)
-    if name =='lgb':         model = LGBMClassifier()
+    if name =='GradientBoosting':   model =GradientBoostingClassifier()
+    if name == 'Xgboost':
+        model = XGBClassifier(max_depth=6, learning_rate=0.05,n_estimators=101,nthread=-1,objective='reg:logistic'
+                              ,reg_alpha=0.04,gamma=0.02,min_child_weight=11) #objective ='reg:squarederror',  silent=0,objective='reg:linear'
+        # gamma=0,min_child_weight=1, max_delta_step=0, subsample=0.85,colsample_bytree=0.7,colsample_bylevel=1,
+        # reg_alpha=0, reg_lambda=1, scale_pos_weight=1, seed=1440, missing=None
+    if name =='LightGBM':   model = LGBMClassifier() #objective='binary',metrics='binary_logloss',n_estimators=101
     # if name =='fm':          model = pylibfm.FM()
     return model
 
@@ -86,19 +95,19 @@ def model_fit(model,x_train, y_train):
     model_fit = model.fit(x_train, y_train)
     return model_fit
 
-def build_train_model(x_train, y_train, model='RandomForestRegressor',type='classifier'):
+def build_train_model(x_train, y_train, name='RandomForestRegressor',type='classifier'):
     if type in ['cl','classifier' ]:
-        model = build_classifier_model(model )  # # 指定模型
+        model = build_classifier_model(name )  # # 指定模型
     if type in ['reg','regressor' ]:
-        model = build_regressor_model( model )  # # 指定模型
+        model = build_regressor_model( name )  # # 指定模型
     model.fit(x_train, y_train)
     return model
 
 from sklearn import model_selection
-def multi_model_test(x,y,n_splits=7):
-    names  =   ['NearestNeighbors','MLP','LR','LinearSVM','RBFSVM','DecisionTree','NaiveBayes',\
-    'ER','GaussianProcess',    'BernoulliNB',    'MultinomialNB','RandomForest',\
-    'AdaBoost','GBC','LinearSVC', 'SVC','GradientBoosting','xgb','lgb' ]
+def multi_model_test(x,y,n_splits=7,score='accuracy'): #f1
+    names  =   [  #'LR','DecisionTree','NaiveBayes','ER','GaussianProcess',
+    'BernoulliNB', 'RandomForest',\
+    'AdaBoost','GradientBoosting','Xgboost','LightGBM','NearestNeighbors','MLP','LinearSVM','RBFSVM' ] #'MultinomialNB',
     models=[]
     for k in names:
         tmp_model = build_classifier_model(  k  )
@@ -106,19 +115,19 @@ def multi_model_test(x,y,n_splits=7):
     results=[]
     for idx in range( len(names) ):
         kfold       = model_selection.KFold( n_splits= n_splits)
-        cv_results  = model_selection.cross_val_score( models[idx] ,x, y,cv=kfold,scoring='f1')
+        cv_results  = model_selection.cross_val_score( models[idx] ,x, y,cv=kfold,scoring=score )#accuray  f1
         results.append( cv_results )
         if  names[idx] =='xgb':
             print('xgb:',cv_results)
-        msg= "%s: %f(%f)" %( names[idx] , cv_results.mean(),cv_results.std()   )
+        msg= "%s: %.3f(%.3f)" %( names[idx] , round(np.median(  cv_results ),3) ,round(cv_results.std() ,3)    )
         print(  msg )
 
     import matplotlib.pyplot as plt
-    fig = plt.figure()
+    fig = plt.figure( figsize=(6,6) )
     fig.suptitle( 'Algorithm(Comparison)' )
     ax = fig.add_subplot(111)
     plt.boxplot( results )
-    ax.set_xticklabels(names,rotation=70)
+    ax.set_xticklabels(names,rotation=15,fontsize=12)
     plt.show()
 
     return
@@ -128,13 +137,14 @@ def multi_model_test(x,y,n_splits=7):
 #这个没啥意义啊
 from  . model_eval  import model_evl
 from sklearn.model_selection import train_test_split
-def train_evl_model_(train_df,features=[], target='', postive_mutiply=3,model='RandomForestRegressor' ,model_file='tmp.model',type='regressor' ):
+def train_evl_model_(train_df,features=[], target='', postive_mutiply=3,modelname='RandomForestRegressor' ,model_file='tmp.model',type='regressor' ):
     print( 'target:', target,'feature:', features )
     model_file = gen_model_path(model_file )
-    x_train,x_test, y_train,y_test = train_test_split( train_df[features].as_matrix(), train_df[target], test_size=0.3, random_state=0)
-    model   = build_train_model( x_train,y_train,model='RandomForestRegressor',type='classifier' )
+    x_train,x_test, y_train,y_test = train_test_split( train_df[features].values, train_df[target], test_size=0.3, random_state=0)
+
+    model   = build_train_model( x_train,y_train,name=modelname,type=type )
     p_test  = model.predict(  x_test     )
-    report  = model_evl( 'regressor',y_test,p_test )
+    report  = model_evl(type,y_test,p_test )
     joblib.dump( model, model_file)
     return  model
 
@@ -142,7 +152,7 @@ def get_lr_model_weight(var_woe_name,LR_model_fit):
     ###保存模型的参数用于计算评分,基于做了拟合后的LR模型
     var_woe_name.append('intercept')
     ##提取权重
-    weight_value = list(LR_model_fit.coef_.flatten())
+    weight_value = list(LR_model_fit.coef_.flatten()) #flatten 返回一维数组
     ##提取截距项
     weight_value.extend(list(LR_model_fit.intercept_))
     dict_params     = dict(zip(var_woe_name, weight_value))
@@ -331,6 +341,32 @@ def grib_xgboost_search(x_train,y_train):
     return xgboost_model,xgb_gsearch
 
 
+def grib_lightGBM(x_train, y_train):
+    grib_lightGBM_params = {'n_estimators':range(20,200,20),"max_depth":range(3,20,2),'num_leaves':range(3,20,2)}
+    gbm = LGBMClassifier()
+                             # max_depth = 6,num_leaves = 40,
+
+    gsearch = GridSearchCV( gbm, param_grid=grib_lightGBM_params, scoring='accuracy', cv=17) #roc_auc
+    gsearch.fit(x_train, y_train)
+    print('The best params:{0}'.format(gsearch.best_params_))
+    print('The best model score:{0}'.format(gsearch.best_score_))
+    print(gsearch.cv_results_['mean_test_score'])
+    print(gsearch.cv_results_['params'])
+
+    ##用最优参数，初始化xgboost模型
+    gbm = LGBMClassifier(objective = 'binary',
+                         is_unbalance = True,
+                         metric = 'binary_logloss,auc',
+                         n_estimators =gsearch.best_params_['n_estimators'] ,
+                         max_depth = gsearch.best_params_['max_depth'] , num_leaves = gsearch.best_params_['max_depth']   ,
+                         learning_rate = 0.1,
+                         feature_fraction = 0.7,
+                         min_child_samples=21,min_child_weight=0.001,
+                         bagging_fraction = 1,bagging_freq = 2,
+                         reg_alpha = 0.001,reg_lambda = 8,
+                         cat_smooth = 0,num_iterations = 200)
+    return gbm,gsearch
+
 def build_train_model_stack(x_train_temp, y_train_temp   ):
     RF_model_1 = RandomForestClassifier(random_state=0, n_jobs=-1, criterion='entropy',
                                         n_estimators=100,
@@ -346,7 +382,7 @@ def build_train_model_stack(x_train_temp, y_train_temp   ):
                                     n_estimators=100,
                                     max_depth=2,
                                     min_child_weight=2,
-                                    subsample=0.8, colsample_bytree=0.8,
+                                    subsample=0.8,
                                     learning_rate=0.02,
                                     scale_pos_weight=2)
     xgboost_model_fit_1 = xgboost_model_1.fit(x_train_temp, y_train_temp)
@@ -488,7 +524,7 @@ def build_train_stack_model(x_train,y_train):
                                         n_estimators=100,
                                         max_depth=2,
                                         min_child_weight=2,
-                                        subsample=0.8, colsample_bytree=0.8,
+                                        subsample=0.8, #colsample_bytree=0.8,
                                         learning_rate=0.02,
                                         scale_pos_weight=2)
         xgboost_model_fit_1 = xgboost_model_1.fit(x_train_temp, y_train_temp)
@@ -548,7 +584,9 @@ def myfunc(x):
 ##生成评分卡 score =  A - Blog( Odds ) = A - B(wo + w1 + w2+ )
 def create_score(dict_woe_map, dict_params, dict_cont_bin, dict_disc_bin):
     ##假设Odds在1:60时对应的参考分值为600分，分值调整刻度PDO为20，则计算得到分值转化的参数B = 28.85，A= 481.86。
-    ## dict_params 每个变量，对应的权重
+    # dict_woe_map 为分箱的WOE值; dic_params逻辑回归后各变量的权重(包含截距); dict_cont_bin 连续变量分箱; dict_disc_bin离散变量分箱
+    #返回，df_score 是各个变量的得分
+    # dict_bin_score,分箱和对应的score
     params_A, params_B = score_params_cal(base_point=600, odds=1 / 60, PDO=20)
     # 计算基础分
     base_points = round(params_A - params_B * dict_params['intercept'])
@@ -558,12 +596,12 @@ def create_score(dict_woe_map, dict_params, dict_cont_bin, dict_disc_bin):
         #        k='duration_BIN'
         #        k = 'foreign_worker_BIN'
         if k != 'intercept':
-            df_temp = pd.DataFrame([dict_woe_map[k.split(sep='_woe')[0]]]).T
+            df_temp = pd.DataFrame([dict_woe_map[ k.split(sep='_woe')[0] ]] ).T  # 变成了 列是 bin, woe值
             df_temp.reset_index(inplace=True)
             df_temp.columns = ['bin', 'woe_val']
             ##计算分值
             df_temp['score'] = round(-params_B * df_temp.woe_val * dict_params[k])
-            dict_bin_score[k.split(sep='_BIN')[0]] = dict(zip(df_temp['bin'], df_temp['score']))
+            dict_bin_score[k.split(sep='_BIN')[0]] = dict( zip(df_temp['bin'], df_temp['score']) )
             ##连续变量的计算
             if k.split(sep='_BIN')[0] in dict_cont_bin.keys():
                 df_1 = dict_cont_bin[k.split(sep='_BIN')[0]]
@@ -571,12 +609,12 @@ def create_score(dict_woe_map, dict_params, dict_cont_bin, dict_disc_bin):
                 df_1 = df_1[['total', 'var_name']]
                 df_temp = pd.merge(df_temp, df_1, on='bin')
                 df_temp['var_name_raw'] = k.split(sep='_BIN')[0]
-                df_score = pd.concat([df_score, df_temp], axis=0)
+                df_score = pd.concat([df_score, df_temp], axis=0)  # 这里是拼接上范围
             ##离散变量的计算
             elif k.split(sep='_BIN')[0] in dict_disc_bin.keys():
                 df_temp = pd.merge(df_temp, dict_disc_bin[k.split(sep='_BIN')[0]], on='bin')
                 df_temp['var_name_raw'] = k.split(sep='_BIN')[0]
-                df_score = pd.concat([df_score, df_temp], axis=0)
+                df_score = pd.concat([df_score, df_temp], axis=0) # 这里也是拼接上范围
 
     df_score['score_base'] = base_points
     return df_score, dict_bin_score, params_A, params_B, base_points
@@ -587,11 +625,11 @@ def cal_score(df_1, dict_bin_score, dict_cont_bin, dict_disc_bin, base_points):
     ##先对原始数据分箱映射，然后，用分数字典dict_bin_score映射分数，基础分加每项的分数就是最终得分
     df_1.reset_index(drop=True, inplace=True)
     df_all_score = pd.DataFrame()
-    ##连续变量
+    ##连续变量分箱
     for i in dict_cont_bin.keys():
         if i in dict_bin_score.keys():
-            df_all_score = pd.concat([df_all_score, varbin_meth.cont_var_bin_map(df_1[i], dict_cont_bin[i]).map(dict_bin_score[i])], axis=1)
-    ##离散变量
+            df_all_score = pd.concat([df_all_score, varbin_meth.cont_var_bin_map( df_1[i], dict_cont_bin[i]).map(dict_bin_score[i])], axis=1)
+    ##离散变量分箱
     for i in dict_disc_bin.keys():
         if i in dict_bin_score.keys():
             df_all_score = pd.concat([df_all_score, varbin_meth.disc_var_bin_map(df_1[i], dict_disc_bin[i]).map(dict_bin_score[i])], axis=1)
@@ -615,7 +653,9 @@ def score_statas( df_all_score ):
     ks = []
     good_num = []
     bad_num = []
+    score_index=[]
     for i in range(len(score_bin) - 1):
+        score_index.append( '%d-%d'%(score_bin[i] ,score_bin[i + 1]) )
         ##取出分数区间的样本
         if score_bin[i + 1] == 900:
             index_1 = (df_all_score.score >= score_bin[i]) & (df_all_score.score <= score_bin[i + 1])
@@ -632,7 +672,7 @@ def score_statas( df_all_score ):
         ##以该分数为注入分数的ks值
         ks.append(sum(bad_num[0:i + 1]) / bad_total - sum(good_num[0:i + 1]) / good_total)
 
-    df_result = pd.DataFrame({'good_num': good_num, 'bad_num': bad_num, 'bin_rate': bin_rate,
+    df_result = pd.DataFrame({'score_bin': score_index , 'good_num': good_num, 'bad_num': bad_num, 'bin_rate': bin_rate,
                               'bad_rate': bad_rate, 'ks': ks})
     print('######计算结果如下###########')
     print(df_result)
@@ -652,3 +692,27 @@ def  build_train_FM(x_train,y_train):
 def fm_predict(fm,x_test):
     y_score_test = fm.predict(x_test)
     return y_score_test
+
+
+import pickle
+def pkl_save(filename,file):
+    output = open(filename, 'wb')
+    pickle.dump(file, output)
+    output.close()
+
+def pkl_load(filename):
+    pkl_file = open(filename, 'rb')
+    file = pickle.load(pkl_file)
+    pkl_file.close()
+    return file
+
+
+def save_lightGBM(model ,model_file="dota_model.txt"):
+    #clf.booster_.savemodel(file)
+    joblib.dump( model, model_file)
+    return
+
+def load_lightGBM(model_file='dota_model.txt'):
+    # clf = lgb.Booster(model_file)
+    model = joblib.load(model_file)
+    return model

@@ -67,7 +67,7 @@ def random_over_sampler(x_data, y_data,sampling_strategy):
 from imblearn.over_sampling import RandomOverSampler, SMOTE
 def smote(x_data, y_data,sampling_strategy=1, k_neighbors=5, kind='regular'):
     ##Smote样本生成方法,插值法
-    sm_sample = SMOTE(random_state=10, sampling_strategy=sampling_strategy, k_neighbors=k_neighbors, kind=kind)
+    sm_sample = SMOTE(random_state=10, sampling_strategy=sampling_strategy, k_neighbors=k_neighbors)
     X_resample, y_resample = sm_sample.fit_resample(x_data, y_data)
     ret_df = pd.DataFrame(X_resample, columns=x_data.columns)
     ret_df['target'] = y_resample

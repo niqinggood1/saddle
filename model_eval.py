@@ -24,20 +24,21 @@ def model_evl( type='classifier',y_true=[], y_pred=[]  ):
         report      = classification_report( y_true, y_pred )  #confusion_matrix 混淆矩阵也要加上
         statadf     = classifaction_report_csv( report  )
         conf_mat    = confusion_matrix(y_true, y_pred  )
+        #print('conf_mat:',conf_mat)
         mat_df      = pd.DataFrame( conf_mat, columns=['预测正例','预测负例'], index=['真实正例','真实负例'] ).reset_index()
         statadf['*']= '*'
         statadf     = pd.merge(statadf,mat_df,left_index=True,right_index=True,how='left')
         roc_auc     = roc_auc_score( y_true, y_pred   )
         statadf['roc']  =''
         statadf     =statadf.fillna('')
-        statadf.loc[0,'roc']=roc_auc
+        statadf.loc[0,'auc']=roc_auc
         # ##计算fpr与tpr
         # fpr, tpr, thresholds = roc_curve(y_test, y_score_test)
         # ks = max(tpr - fpr)
 
         recall_value    = recall_score( y_true, y_pred)   #召回率 TP/(TP+FN)  就是正样本的覆盖率，与明敏度一个意思
         precision_value = precision_score(y_true, y_pred) #TP/(TP+FP)
-        acc             = accuracy_score( y_true, y_pred)
+        accuracy        = accuracy_score( y_true, y_pred)
         b2              =  1**2
         F_Score         =  (1+b2)*precision_value*recall_value/( b2*precision_value + recall_value   )   #F-Measure
         print(conf_mat)
@@ -45,7 +46,7 @@ def model_evl( type='classifier',y_true=[], y_pred=[]  ):
                                                                                  precision_value))
         statadf.loc[0,'recall']     =recall_value
         statadf.loc[0, 'precision'] = precision_value
-        statadf.loc[0, 'acc']       = acc
+        statadf.loc[0, 'accuracy']  = accuracy
         statadf.loc[0, 'bb']        = b2
         statadf.loc[0, 'F_Score']   = F_Score
         #  precision, recall           = precision_recall_curve( y_true, y_pred ) #这个是画P-R曲线

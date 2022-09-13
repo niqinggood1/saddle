@@ -1,5 +1,9 @@
-##区分出离散变量与连续变量
-def category_continue_separation(df, feature_names):
+# descrirption :
+# category_continue_separation
+#
+def category_continue_separation(data_df, feature_names):
+    ##区分出离散变量与连续变量, 首先要剔除掉target\ label特征;
+    #输入是dataframe和 feature_lists
     categorical_var = []
     numerical_var = []
     if 'target' in feature_names :
@@ -7,7 +11,7 @@ def category_continue_separation(df, feature_names):
     if 'label' in feature_names :
         feature_names.remove('label')
     ##先判断类型，如果是int或float就直接作为连续变量 select_dtypes
-    numerical_var   = list( df[feature_names].select_dtypes(include=['int', 'float', 'int32', 'float32', 'int64', 'float64']).columns.values)
+    numerical_var   = list( data_df[feature_names].select_dtypes(include=['int', 'float', 'int32', 'float32', 'int64', 'float64']).columns.values)
     categorical_var = [x for x in feature_names if x not in numerical_var]
     return categorical_var, numerical_var
 
@@ -17,7 +21,8 @@ def contiues_tranfer_to_category(data_train,data_test,numerical_var,categorical_
         if len(data_train[s].unique()) <= limit_num:
             categorical_var.append(s)
             numerical_var.remove(s)
-            ##同时将后加的数值变量转为字符串
+            ##对数值少于一定值的数值变量转为离散特征变量，同时将后加的数值变量转为字符串
+            #handle both train and test
             index_1 = data_train[s].isnull()
             if sum(index_1) > 0:
                 data_train.loc[~index_1, s] = data_train.loc[~index_1, s].astype('str')
@@ -30,9 +35,9 @@ def contiues_tranfer_to_category(data_train,data_test,numerical_var,categorical_
                 data_test[s] = data_test[s].astype('str')
     return data_train,data_test,numerical_var,categorical_var
 
-
+#
 def get_disc_bin(df, numerical_var,categorical_var ):
-    dict_cont_bin = {}
+    dict_cont_bin = {}  #dict_cont_bin 是每个变量i,后面对应的分箱
     for i in numerical_var:
         print(i)
         dict_cont_bin[i], gain_value_save_train1, gain_rate_save1 = varbin_meth.cont_var_bin(df[i], df.target, method=2, mmin=3, mmax=12,
@@ -49,14 +54,16 @@ def get_disc_bin(df, numerical_var,categorical_var ):
 
 
 from . import variable_bin_methods  as varbin_meth
-def cont_disc_bin_merge(df,dict_cont_bin,dict_disc_bin):
+def cont_disc_bin_merge( df, dict_cont_bin,dict_disc_bin ):
     ##训练数据分箱，连续变量分箱映射
     df_cont_bin     = pd.DataFrame()
     for i in dict_cont_bin.keys():
+        print(i)
         df_cont_bin = pd.concat([df_cont_bin, varbin_meth.cont_var_bin_map(df[i], dict_cont_bin[i])], axis=1)
     ##离散变量分箱映射
     df_disc_bin     = pd.DataFrame()
     for i in dict_disc_bin.keys():
+        print(i)
         df_disc_bin = pd.concat([df_disc_bin, varbin_meth.disc_var_bin_map(df[i], dict_disc_bin[i])], axis=1)
 
     if 'target' in df.columns:

@@ -1,3 +1,14 @@
+
+
+import math
+from statsmodels.tsa.holtwinters import ExponentialSmoothing,SimpleExpSmoothing
+def get_predict_ets_optimize(a_in, T=1):
+    a_in    = np.array([i for i in a_in if math.isnan(i) == False])
+    model   = ExponentialSmoothing(a_in, trend='additive').fit(optimized=True)  #optimized=True # ,smoothing_level=0.5 additive ExponentialSmoothing mul add  ,use_basinhopping=True
+    pred    = model.predict(start=len(a_in), end=len(a_in)+T-1)
+    return pred
+
+
 import warnings
 warnings.filterwarnings('ignore')
 from statsmodels.tsa.holtwinters import ExponentialSmoothing,SimpleExpSmoothing
@@ -6,17 +17,18 @@ def get_predict_ets( a_in, T=1 ):
     pred    = model.predict(start= len(a_in), end= len(a_in)+T-1 )
     return pred
 
-def get_predict_ets_optimize(a_in, T=1):
-    a_in    = np.array([i for i in a_in if math.isnan(i) == False])
-    model   = ExponentialSmoothing(a_in, trend='additive').fit(optimized=True)  #optimized=True # ,smoothing_level=0.5 additive ExponentialSmoothing mul add  ,use_basinhopping=True
-    pred    = model.predict(start=len(a_in), end=len(a_in)+T-1)
-    return pred
+# #一次预测出未来T天数据
+# def get_predict_ets_optimize(a_in, T=1):
+#     a_in    = np.array([i for i in a_in if math.isnan(i) == False])
+#     model   = ExponentialSmoothing(a_in, trend='additive').fit(optimized=True)  #optimized=True # ,smoothing_level=0.5 additive ExponentialSmoothing mul add  ,use_basinhopping=True
+#     pred    = model.predict(start=len(a_in), end=len(a_in)+T-1)
+#     return pred
 
 import pandas as pd
 from pyramid.arima import auto_arima
 import numpy as np
 from statsmodels.tsa.seasonal import seasonal_decompose
-def decompose_arima_predict(x,n_periods,freq='M',begin_date='1/1/2014'):
+def decompose_arima_predict(x,n_periods,freq='M',begin_date='1/1/2014',period=12):
     #时间序做分解,分别建模，做预测
     #x是建模的原始数据，n_periods是预测未来几期
     #返回未来n_periods的预测
@@ -37,10 +49,14 @@ def decompose_arima_predict(x,n_periods,freq='M',begin_date='1/1/2014'):
 
     residual_model  = auto_arima(residual, trace=True, error_action='ignore', suppress_warnings=True)
     residual_model.fit(residual)
+
     residual_forecast = residual_model.predict(n_periods=n_periods)
 
     len_seasonal = len(seasonal)
-    seasonal_forecast = [seasonal.values[i + len_seasonal - 12] for i in range(n_periods)]
+    try:
+        seasonal_forecast = [seasonal.values[i + len_seasonal - period] for i in range(n_periods)]
+    except:
+        seasonal_forecast = [0]*diff
 
     pred_result = pd.Series(trend_forecast)  # #trend_forecast  trend_forecast
     pred_result =  pred_result.add(  seasonal_forecast ).add( residual_forecast  )
@@ -166,85 +182,85 @@ if __name__ == '__main__':
             print('key--end ' * 5, key)
         final_predict_df.index = final_predict_df.index.date
         final_predict_df.to_excel( 'ets_optimize预测T%d_'%(diff) + region+ '_'+file_name,index_label ='年月' )
-
-from pandas import read_csv
-from datetime import datetime
-# load data
-def parse(x):
-    return datetime.strptime(x, '%Y %m %d %H')
-dataset = read_csv('PRSA_data_2010.1.1-2014.12.31.csv',  parse_dates = [['year', 'month', 'day', 'hour']], index_col=0, date_parser=parse)
-dataset.drop('No', axis=1, inplace=True)
-# manually specify column names
-dataset.columns = ['pollution', 'dew', 'temp', 'press', 'wnd_dir', 'wnd_spd', 'snow', 'rain']
-dataset.index.name = 'date'
-# mark all NA values with 0
-dataset['pollution'].fillna(0, inplace=True)
-# drop the first 24 hours
-dataset = dataset[24:]
-# summarize first 5 rows
-print(dataset.head(5))
-# save to file
-dataset.to_csv('pollution.csv')
-
-from pandas import read_csv
-from matplotlib import pyplot
-# load dataset
-dataset = read_csv('pollution.csv', header=0, index_col=0)
-values = dataset.values
-# specify columns to plot
-groups = [0, 1, 2, 3, 5, 6, 7]
-i = 1
-# plot each column
-pyplot.figure()
-for group in groups:
-    pyplot.subplot(len(groups), 1, i)
-    pyplot.plot(values[:, group])
-    pyplot.title(dataset.columns[group], y=0.5, loc='right')
-    i += 1
-
-from pandas import read_csv
-from matplotlib import pyplot
-# load dataset
-dataset = read_csv('pollution.csv', header=0, index_col=0)
-values = dataset.values
-# specify columns to plot
-groups = [0, 1, 2, 3, 5, 6, 7]
-i = 1
-# plot each column
-pyplot.figure()
-for group in groups:
-    pyplot.subplot(len(groups), 1, i)
-    pyplot.plot(values[:, group])
-    pyplot.title(dataset.columns[group], y=0.5, loc='right')
-    i += 1
-
-pyplot.show()
-
-import pandas as pd
-import numpy as np
-from fbprophet import Prophet
-df = pd.read_excel('C:/Users/yangge/Desktop/prophet-master/examples/example_wp_peyton_manning.xlsx')
-df['y'] = np.log(df['y'])
-playoffs = pd.DataFrame({
-  'holiday': 'playoff',
-  'ds': pd.to_datetime(['2008-01-13', '2009-01-03', '2010-01-16',
-                        '2010-01-24', '2010-02-07', '2011-01-08',
-                        '2013-01-12', '2014-01-12', '2014-01-19',
-                        '2014-02-02', '2015-01-11', '2016-01-17',
-                        '2016-01-24', '2016-02-07']),
-  'lower_window': 0,
-  'upper_window': 1,
-})
-superbowls = pd.DataFrame({
-  'holiday': 'superbowl',
-  'ds': pd.to_datetime(['2010-02-07', '2014-02-02', '2016-02-07']),
-  'lower_window': 0,
-  'upper_window': 1,
-})
-holidays = pd.concat((playoffs, superbowls))#季后赛和超级碗比赛特别日期
-m = Prophet(holidays=holidays)#指定节假日参数，其它参数以默认值进行训练
-m.fit(df)#对过去数据进行训练
-future = m.make_future_dataframe(freq='D',periods=365)#建立数据预测框架，数据粒度为天，预测步长为一年
-forecast =m.predict(future)
-m.plot(forecast).show()#绘制预测效果图
-m.plot_components(forecast).show()#
+#
+# from pandas import read_csv
+# from datetime import datetime
+# # load data
+# def parse(x):
+#     return datetime.strptime(x, '%Y %m %d %H')
+# dataset = read_csv('PRSA_data_2010.1.1-2014.12.31.csv',  parse_dates = [['year', 'month', 'day', 'hour']], index_col=0, date_parser=parse)
+# dataset.drop('No', axis=1, inplace=True)
+# # manually specify column names
+# dataset.columns = ['pollution', 'dew', 'temp', 'press', 'wnd_dir', 'wnd_spd', 'snow', 'rain']
+# dataset.index.name = 'date'
+# # mark all NA values with 0
+# dataset['pollution'].fillna(0, inplace=True)
+# # drop the first 24 hours
+# dataset = dataset[24:]
+# # summarize first 5 rows
+# print(dataset.head(5))
+# # save to file
+# dataset.to_csv('pollution.csv')
+#
+# from pandas import read_csv
+# from matplotlib import pyplot
+# # load dataset
+# dataset = read_csv('pollution.csv', header=0, index_col=0)
+# values = dataset.values
+# # specify columns to plot
+# groups = [0, 1, 2, 3, 5, 6, 7]
+# i = 1
+# # plot each column
+# pyplot.figure()
+# for group in groups:
+#     pyplot.subplot(len(groups), 1, i)
+#     pyplot.plot(values[:, group])
+#     pyplot.title(dataset.columns[group], y=0.5, loc='right')
+#     i += 1
+#
+# from pandas import read_csv
+# from matplotlib import pyplot
+# # load dataset
+# dataset = read_csv('pollution.csv', header=0, index_col=0)
+# values = dataset.values
+# # specify columns to plot
+# groups = [0, 1, 2, 3, 5, 6, 7]
+# i = 1
+# # plot each column
+# pyplot.figure()
+# for group in groups:
+#     pyplot.subplot(len(groups), 1, i)
+#     pyplot.plot(values[:, group])
+#     pyplot.title(dataset.columns[group], y=0.5, loc='right')
+#     i += 1
+#
+# pyplot.show()
+#
+# import pandas as pd
+# import numpy as np
+# from fbprophet import Prophet
+# df = pd.read_excel('C:/Users/yangge/Desktop/prophet-master/examples/example_wp_peyton_manning.xlsx')
+# df['y'] = np.log(df['y'])
+# playoffs = pd.DataFrame({
+#   'holiday': 'playoff',
+#   'ds': pd.to_datetime(['2008-01-13', '2009-01-03', '2010-01-16',
+#                         '2010-01-24', '2010-02-07', '2011-01-08',
+#                         '2013-01-12', '2014-01-12', '2014-01-19',
+#                         '2014-02-02', '2015-01-11', '2016-01-17',
+#                         '2016-01-24', '2016-02-07']),
+#   'lower_window': 0,
+#   'upper_window': 1,
+# })
+# superbowls = pd.DataFrame({
+#   'holiday': 'superbowl',
+#   'ds': pd.to_datetime(['2010-02-07', '2014-02-02', '2016-02-07']),
+#   'lower_window': 0,
+#   'upper_window': 1,
+# })
+# holidays = pd.concat((playoffs, superbowls))#季后赛和超级碗比赛特别日期
+# m = Prophet(holidays=holidays)#指定节假日参数，其它参数以默认值进行训练
+# m.fit(df)#对过去数据进行训练
+# future = m.make_future_dataframe(freq='D',periods=365)#建立数据预测框架，数据粒度为天，预测步长为一年
+# forecast =m.predict(future)
+# m.plot(forecast).show()#绘制预测效果图
+# m.plot_components(forecast).show()#

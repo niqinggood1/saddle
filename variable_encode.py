@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-第5章 变量编码
 变量编码:one-hot编码、标签编码、自定义字典映射、woe编码
 """
 import os
@@ -13,20 +12,7 @@ from sklearn.model_selection import train_test_split
 import warnings
 warnings.filterwarnings("ignore") ##忽略警告
 ##注意sklearn版本要在v.20.0以上，不同版本函数的位置会不同。
-def data_read(data_path,file_name):
-    df = pd.read_csv( os.path.join(data_path, file_name), delim_whitespace = True, header = None )
-    ##变量重命名
-    columns = ['status_account','duration','credit_history','purpose', 'amount',
-               'svaing_account', 'present_emp', 'income_rate', 'personal_status',
-               'other_debtors', 'residence_info', 'property', 'age',
-               'inst_plans', 'housing', 'num_credits',
-               'job', 'dependents', 'telephone', 'foreign_worker', 'target']
-    df.columns = columns
-    ##将标签变量由状态1,2转为0,1;0表示好用户，1表示坏用户
-    df.target = df.target - 1
-      ##数据分为data_train和 data_test两部分，训练集用于得到编码函数，验证集用已知的编码规则对验证集编码
-    data_train, data_test = train_test_split(df, test_size=0.2, random_state=0,stratify=df.target)
-    return data_train, data_test
+
 ##one—hot编码
 def onehot_encode(df,data_path_1,flag='train'):
     df = df.reset_index(drop=True)
@@ -171,7 +157,7 @@ def woe_encode(df,data_path_1,varnames, y, filename,flag='train'):
     ---------------------------------------
     Return
     df: pandas dataframe, 编码后的数据，包含了原始数据
-    woe_maps: dict,woe编码字典
+    woe_maps: dict,woe编码字典     var 是列特征名， value是 特征对应的woe map
     iv_values: dict, 每个变量的IV值
     """  
     df = df.reset_index(drop=True)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-第6章：变量分箱方法
+变量分箱方法
 1:Chi-merge(卡方分箱), 2:IV(最优IV值分箱), 
 3:信息熵(基于树的分箱)
 """
@@ -179,27 +179,25 @@ def select_split_point(temp_bin, method):
     return newBins.sort_values(by=['bin', 'bad_rate']), round( bin_i_value[0][1] ,4)
 
 
-def init_equal_bin(x,bin_rate):
+def init_equal_bin(x,bin_rate=0.1,up_per=97,low_per=3):
     """ 初始化等距分组，cont_var_bin函数的中间过程函数##参数
     x:要分组的变量值，pandas series
     bin_rate：比例值1/bin_rate
-    ##返回值
-    返回初始化分箱结果，pandas dataframe
+    ##返回值:     返回初始化分箱结果，pandas dataframe
     """
     ##异常值剔除，只考虑90%没的最大值与最小值，边界与-inf或inf分为一组
-    if len(x[x > np.percentile(x, 95)]) > 0 and len(np.unique(x)) >=30:
-        var_up= min( x[x > np.percentile(x, 95)] )
+    if len(x[x > np.percentile(x, up_per)]) > 0 and len(np.unique(x)) >=30:
+        var_up= min( x[x > np.percentile(x,up_per)] )
     else:
         var_up = max(x)
-    if len(x[x < np.percentile(x, 5)]) > 0:
-        var_low= max( x[x < np.percentile(x, 5)] )
+    if len(x[x < np.percentile(x, low_per)]) > 0:
+        var_low= max( x[x < np.percentile(x, low_per)] )
     else:
         var_low = min(x)
     ##初始化分组
     bin_num     = int(1/ bin_rate)
-    dist_bin    = (var_up - var_low) / bin_num  ##分箱间隔
-    bin_up      = []
-    bin_low     = []
+    dist_bin    = (var_up - var_low)/ bin_num  ##分箱间隔
+    bin_up      = [];    bin_low     = []
     for i in range(1, bin_num + 1):
         if i == 1:
             bin_up.append( var_low + i * dist_bin)
@@ -287,11 +285,9 @@ def cont_var_bin(x, y, method, mmin=5, mmax=10, bin_rate=0.01, stop_limit=0.1, b
     bin_rate：等距初始化分箱参数，分箱数为1/bin_rate,分箱间隔在数据中的最小值与最大值将等间隔取值
     stop_limit:分箱earlystopping机制，如果已经没有明显增益即停止分箱
     bin_min_num:每组最小样本数
-    ##返回值
-    分箱结果：pandas dataframe
+    ##返回值  分箱结果：pandas dataframe,每次切分得到的gain, gain的比例
     """
-    ##缺失值单独取出来
-    df_na = pd.DataFrame({'x': x[pd.isnull(x)], 'y': y[pd.isnull(x)]})
+    df_na = pd.DataFrame({'x': x[pd.isnull(x)], 'y': y[pd.isnull(x)]})   ##缺失值单独取出来
     y = y[~pd.isnull(x)]
     x = x[~pd.isnull(x)]
     ##初始化分箱，等距的方式，后面加上约束条件,没有箱内样本数没有限制
@@ -533,7 +529,6 @@ def load_var_bin(filename):
 
 if __name__ == '__main__':
     path = './code/chapter6/'
-    #path = 'D:/code/chapter6/'
     data_path = os.path.join(path,'data')
     file_name = 'german.csv'
     ##读取数据
