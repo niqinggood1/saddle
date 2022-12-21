@@ -1,5 +1,4 @@
 import tensorflow as tf
-from tf2crf import CRF, ModelWithCRFLoss
 from tensorflow.keras.layers import Input, LSTM, Bidirectional, Dense, Dropout, Concatenate, Embedding
 from tensorflow.keras.models import Model
 import tensorflow.keras.backend as K
@@ -262,7 +261,7 @@ def bert_bilstm_crf( MODEL_PATH,inter_dense=256, nclasses=20,MAX_TEXT=512 ):
     #               loss={ 'crf_output': crf.loss},  #'out1': 'categorical_crossentropy', { 'crf_output': crf.loss}
     #               loss_weights={'crf_output': 1},           #{'out1': 1, 'crf_output': 1},
     #               metrics=["acc"])
-    plot_model(model, to_file="model.png")
+    #plot_model(model, to_file="model.png")
     #model.summary()
     return model
 

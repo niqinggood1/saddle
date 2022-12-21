@@ -92,15 +92,15 @@ def create_deberta_dataset( X_input_ids, X_attn_masks, labels ,shuffle_len=10000
     dataset = dataset.shuffle(shuffle_len).batch(batchsize, drop_remainder=True)
     return dataset
 
-from sklearn import preprocessing
-from sklearn.preprocessing import LabelEncoder
-def encode_categorical_cols(df, cols_to_encode):
-    print('Encoding cols: {}'.format(cols_to_encode))
-    for f in cols_to_encode:
-        lbl = preprocessing.LabelEncoder()
-        lbl.fit(list(df[f].values))
-        df[f] = lbl.transform(list(df[f].values))
-    return df
+# from sklearn import preprocessing
+# from sklearn.preprocessing import LabelEncoder
+# def encode_categorical_cols(df, cols_to_encode):
+#     print('Encoding cols: {}'.format(cols_to_encode))
+#     for f in cols_to_encode:
+#         lbl = preprocessing.LabelEncoder()
+#         lbl.fit(list(df[f].values))
+#         df[f] = lbl.transform(list(df[f].values))
+#     return df
 
 import keras.backend as K
 def getPrecision(y_true, y_pred):
