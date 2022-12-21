@@ -1,8 +1,13 @@
-import saddle as sa
 import tensorflow.compat.v1 as tf
 from tensorflow.keras.layers import Layer
 from tensorflow.keras.layers import Input, Dense,Embedding,Dropout
 
+
+def sparseFeature(feat, feat_onehot_dim, embed_dim):
+    return {'feat': feat, 'feat_onehot_dim': feat_onehot_dim, 'embed_dim': embed_dim}
+
+def denseFeature(feat):
+    return {'feat': feat}
 class Dense_layer(Layer):
     def __init__(self, hidden_units, output_dim, hidden_layer_activation):
         super().__init__()
@@ -66,7 +71,7 @@ class DCN(Model):
         #self.output_layer = Dense_layer([16,8,8], 1 , activation=activation)
         #self.hidden_layer = Dense_layer([128], 32, hidden_layer_activation='elu')
         self.output_layer = Dense( 1, activation=last_activation,
-                                   kernel_regularizer=tf.keras.regularizers.l1(0.01)  )
+                                   kernel_regularizer=tf.keras.regularizers.l1_l2(0.001,0.02)  )
         print( 'in DCN embeding len:',len(self.embed_layers),'sparse_fea_num',self.sparse_fea_num,  self.embed_layers.keys() )
         #,        bias_regularizer=tf.keras.regularizers.l2(0.01)
     def call(self, inputs):
@@ -91,9 +96,7 @@ class DCN(Model):
         # Dense layer
         dnn_output = self.dense_layer(x)
         x = tf.concat([cross_output, dnn_output,x], axis=1)
-
         output =  self.output_layer(x) # output = tf.nn.sigmoid( self.output_layer(x) ) # 这里有改变，需要定位，需要论证是否可行
-
         return output
 
 from .fm import Attention_layer

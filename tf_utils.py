@@ -194,6 +194,7 @@ def use_cpu():
     import os
     # os.environ["CUDA_DEVICE_ORDER"]  = 'PCI_BUS_ID'
     os.environ["CUDA_VISIBLE_DEVICES"] = '-1'   #"-1" '-1' #'-1'
+    return
 
 def gen_mnist_datas():
     """生成数据

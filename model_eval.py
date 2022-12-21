@@ -66,6 +66,11 @@ def model_evl( type='classifier',y_true=[], y_pred=[]  ):
     return  statadf
 
 
+from sklearn.metrics import confusion_matrix
+def confusion( label_true, label_test ):
+    ret = confusion_matrix( label_true, label_test )
+    return  ret
+
 from sklearn.metrics import roc_curve,confusion_matrix,recall_score, auc
 def plot_ks(y_test,y_score_test):
     import matplotlib.pyplot as plt
@@ -75,8 +80,7 @@ def plot_ks(y_test,y_score_test):
     ks = max(tpr - fpr)
     ar = 2 * roc_auc - 1
     gini = ar
-    print('test set:  model AR is {0},and ks is {1}'.format(ar,
-                                                            ks))
+    print('test set:  model AR is {0},and ks is {1}'.format(ar,ks))
     ####ks曲线
     plt.figure(figsize=(10, 6))
     fontsize_1 = 12

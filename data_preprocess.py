@@ -9,7 +9,7 @@ def category_continue_separation(data_df, feature_names):
     if 'target' in feature_names :
         feature_names.remove('target')
     if 'label' in feature_names :
-        feature_names.remove('label')
+        feature_names.remove( 'label' )
     ##先判断类型，如果是int或float就直接作为连续变量 select_dtypes
     numerical_var   = list( data_df[feature_names].select_dtypes(include=['int', 'float', 'int32', 'float32', 'int64', 'float64']).columns.values)
     categorical_var = [x for x in feature_names if x not in numerical_var]
@@ -39,12 +39,13 @@ def contiues_tranfer_to_category(data_train,data_test,numerical_var,categorical_
 def get_disc_bin(df, numerical_var,categorical_var ):
     dict_cont_bin = {}  #dict_cont_bin 是每个变量i,后面对应的分箱
     for i in numerical_var:
-        print(i)
+        print('numerical_var:',i)
         dict_cont_bin[i], gain_value_save_train1, gain_rate_save1 = varbin_meth.cont_var_bin(df[i], df.target, method=2, mmin=3, mmax=12,
                                                                                      bin_rate=0.01, stop_limit=0.05, bin_min_num=20)
     ###离散变量分箱
     dict_disc_bin = {} ; del_key = []
     for i in categorical_var:
+        print('categorical_var:', i)
         dict_disc_bin[i], gain_value_save2, gain_rate_save2, del_key_1 = varbin_meth.disc_var_bin(df[i], df.target, method=2, mmin=3,
                                                                                                 mmax=8, stop_limit=0.05, bin_min_num=20)
         if len( del_key_1 ) > 0:
@@ -64,7 +65,7 @@ def cont_disc_bin_merge( df, dict_cont_bin,dict_disc_bin ):
     df_disc_bin     = pd.DataFrame()
     for i in dict_disc_bin.keys():
         print(i)
-        df_disc_bin = pd.concat([df_disc_bin, varbin_meth.disc_var_bin_map(df[i], dict_disc_bin[i])], axis=1)
+        df_disc_bin = pd.concat([df_disc_bin, varbin_meth. disc_var_bin_map(df[i], dict_disc_bin[i])], axis=1)
 
     if 'target' in df.columns:
         df_disc_bin['target'] = df.target
@@ -86,7 +87,6 @@ def Z_ScoreNormalization(x, mu, sigma):
 def als_recommend():
     return
 def describe(df):
-
     df.status_account.unique()
     df.describe()
     #df.drop_duplicates(subset=['order_id'], keep='first', inplace=True)

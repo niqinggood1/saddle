@@ -33,7 +33,11 @@ def build_regressor_model(name='RandomForestRegressor'):
     if name == 'ER':    model = ExtraTreeRegressor()    ### ExtraTree极端随机树回归 ###
     if name == 'Xgboost':
         model = XGBRegressor(max_depth=3,n_estimators=101,learning_rate=0.1)
-    if name == 'LightGBM':   model = LGBMRegressor(n_estimators=100)
+    if name == 'LightGBM':   model = LGBMRegressor( objective='regression',
+                              max_depth = 4,
+                              learning_rate=0.05, n_estimators=1001,reg_alpha=0.2,reg_lambda=0.001,
+                              metric='rmae', bagging_fraction = 0.8,feature_fraction = 0.8)
+
     return model
 
 # from sklearn.datasets import make_moons, make_circles, make_classification
@@ -50,7 +54,6 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
 from sklearn import ensemble
 from sklearn.naive_bayes import GaussianNB,BernoulliNB
-
 from scipy.sparse import csr_matrix
 from sklearn.model_selection import GridSearchCV
 from sklearn.neural_network import MLPClassifier
