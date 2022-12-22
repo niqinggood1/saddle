@@ -3,7 +3,7 @@ from tensorflow.keras.layers import Input, LSTM, Bidirectional, Dense, Dropout, 
 from tensorflow.keras.models import Model
 import tensorflow.keras.backend as K
 from tensorflow.keras.utils import plot_model
-from nlp_huggingface import load_bert
+from .nlp_huggingface import load_bert
 import tensorflow_addons as tfa
 import tensorflow.keras.backend as K
 from tensorflow_addons.text.crf import crf_log_likelihood
@@ -248,12 +248,17 @@ def bert_bilstm_crf( MODEL_PATH,inter_dense=256, nclasses=20,MAX_TEXT=512 ):
     attn_masks  = tf.keras.layers.Input( shape=(MAX_TEXT,), name='attention_mask', dtype='int32' )  # Input layer.
     bert_output = bertmodel.bert( input_ids, attention_mask=attn_masks)
     last_hidden_state = bert_output[0]
-    x = Bidirectional( LSTM(nclasses, return_sequences=True,activation='relu' ))( last_hidden_state )
-    crf = CRF( nclasses, name ="crf_output",dtype='float32') # sparse_target=True,nclasses, name="crf_output"
+    x           = Bidirectional( LSTM(nclasses, return_sequences=True,activation='relu' ))( last_hidden_state )
+    crf         = CRF( nclasses, name ="crf_output",dtype='float32')
     output_layer= crf(x)
-    base_model = Model( inputs=[input_ids, attn_masks ], outputs=output_layer ) #[out1, crf_output]
-    model = ModelWithCRFLoss( base_model, sparse_target=True )
-    model.compile(optimizer='adam')
+    base_model  = Model( inputs=[input_ids, attn_masks ], outputs=output_layer ) #[out1, crf_output]
+    model       = ModelWithCRFLoss( base_model, sparse_target=True )
+    lr_schedule = optimizers.schedules.ExponentialDecay(
+        initial_learning_rate=0.001,
+        decay_steps=1200,
+        decay_rate=0.90)
+    optimizer = optimizers.Adam(learning_rate=lr_schedule)
+    model.compile(optimizer=optimizer)  #'adam'
 
     #model.compile( optimizer='adam',loss=crf.loss_function, metrics=[crf.accuracy] ) #[crf.accuracy]
     ###模型有两个loss,categorical_crossentropy和crf.loss_function

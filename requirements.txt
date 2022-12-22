@@ -1,1 +1,3 @@
 tensorflow_addons
+sklearn_crfsuite
+scikit-learn

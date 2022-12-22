@@ -3,7 +3,7 @@ import setuptools
 setuptools.setup(
     name="saddle",
     version="0.1.0",
-    author="patrickNi",
+    author="patrick",
     author_email="niqinggood@gmail.com",
     description="Use this package to make Machine Learn Algorithm more convenient ",
     long_description="made by Patrick",
@@ -16,3 +16,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
 )
+
+
+# tensorflow_addons
