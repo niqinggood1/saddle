@@ -242,6 +242,7 @@ def compute_dsc_loss(y_pred, y_true, alpha=0.6):
 
 # from keras_contrib.losses import crf_loss
 # from keras_contrib.metrics import crf_accuracy
+from tensorflow.keras import losses, optimizers
 def bert_bilstm_crf( MODEL_PATH,inter_dense=256, nclasses=20,MAX_TEXT=512,learning_rate=0.0001 ):
     bertmodel   = load_bert(  MODEL_PATH )
     input_ids   = tf.keras.layers.Input(  shape=(MAX_TEXT,), name='input_ids', dtype='int32'      )  # Input layer.
@@ -253,11 +254,11 @@ def bert_bilstm_crf( MODEL_PATH,inter_dense=256, nclasses=20,MAX_TEXT=512,learni
     output_layer= crf(x)
     base_model  = Model( inputs=[input_ids, attn_masks ], outputs=output_layer ) #[out1, crf_output]
     model       = ModelWithCRFLoss( base_model, sparse_target=True )
-    lr_schedule = optimizer.schedules.ExponentialDecay(
+    lr_schedule = optimizers.schedules.ExponentialDecay(
         initial_learning_rate=learning_rate,
         decay_steps=1200,
         decay_rate=0.90)
-    optimizer = optimizer.Adam(learning_rate=lr_schedule)
+    optimizer = optimizers.Adam(learning_rate=lr_schedule)
     model.compile(optimizer=optimizer)  #'adam'
 
     #model.compile( optimizer='adam',loss=crf.loss_function, metrics=[crf.accuracy] ) #[crf.accuracy]
