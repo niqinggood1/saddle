@@ -1,5 +1,5 @@
 # saddle
-saddle是马鞍意思，意为通过此工具可以更好的做一些机器学习应用
+saddle是马鞍意思，意为通过此工具可以更方便驾驭MachineLearn算法，将其应用到自己项目中  
 nlp					: 	nlp相关如 tf-idf\bert  
 riskmanagement		:	风控相关  
 statistical_model	:	传统统计模型  
