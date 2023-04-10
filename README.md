@@ -1,6 +1,6 @@
 # saddle
 saddle意思为马鞍，旨在通过此工具包更方便驾驭MachineLearn算法，将其应用到自己项目中  
-nlp					: 	nlp相关如 tf-idf\bert  
+nlp					: 	nlp相关如 tf-idf\bert\命名实体识别:bert+CRF  
 riskmanagement		:	风控相关  
 statistical_model	:	传统统计模型  
 feature_process		:	特征处理相关  

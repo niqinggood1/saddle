@@ -2,3 +2,5 @@ tensorflow_addons
 sklearn_crfsuite
 scikit-learn
 seqeval
+textrank4zh
+scipy==1.8.0
