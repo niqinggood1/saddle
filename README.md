@@ -8,5 +8,5 @@ feature_process		:	特征处理相关
 ctr					: 	FM\wide&Deep\DCN\DeepFM\XDeepFM等算法  
 dl					:	深度学习一些算法  
 
-安装方式：  python  setup.py  install 
-引用    ： from saddle.ctr.dcn import Cross_layer 
+安装方式：  python  setup.py  install  
+引用    ： from saddle.ctr.dcn import Cross_layer  
